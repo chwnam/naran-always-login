@@ -1,10 +1,12 @@
 <?php
 /**
- * Plugin Name: Naran Persistent Login
- * Author:      changwoo
- * Author URI:  mailto://chwnam@gmail.com
- * Plugin URI:  https://github.com/chwnam/naran-persistent-login
- * Version:     1.0.0
+ * Plugin Name:  Naran Persistent Login
+ * Description:  Keep the user always logged in.
+ * Author:       changwoo
+ * Author URI:   mailto://chwnam@gmail.com
+ * Plugin URI:   https://github.com/chwnam/naran-persistent-login
+ * Requires PHP: 7.2
+ * Version:      1.0.1
  */
 
 add_action( 'init', 'npl_init' );
