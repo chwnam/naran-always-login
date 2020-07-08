@@ -6,7 +6,7 @@
  * Author URI:   mailto://chwnam@gmail.com
  * Plugin URI:   https://github.com/chwnam/naran-persistent-login
  * Requires PHP: 7.2
- * Version:      1.0.1
+ * Version:      1.0.2
  */
 
 add_action( 'init', 'npl_init' );
