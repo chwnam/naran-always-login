@@ -18,7 +18,7 @@ function npl_init() {
 			wp_set_auth_cookie( $user->ID, true, is_ssl() );
 			$redirect = apply_filters( 'npl_redirect', defined( 'NPL_REDIRECT' ) ? NPL_REDIRECT : null );
 			if ( ! $redirect ) {
-				$redirect = admin_url();
+				$redirect = isset( $_SERVER['REQUEST_URI'] ) ? $_SERVER['REQUEST_URI'] : admin_url();
 			}
 			wp_safe_redirect( esc_url_raw( $redirect ) );
 			exit;
