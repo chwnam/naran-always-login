@@ -6,10 +6,12 @@
  * Author URI:   mailto://chwnam@gmail.com
  * Plugin URI:   https://github.com/chwnam/naran-persistent-login
  * Requires PHP: 7.2
- * Version:      1.0.2
+ * Version:      1.0.3
  */
 
-add_action( 'init', 'npl_init' );
+if ( defined( 'NPL_ENABLED' ) && NPL_ENABLED ) {
+	add_action( 'init', 'npl_init' );
+}
 
 function npl_init() {
 	if ( npl_condition() ) {
@@ -24,8 +26,8 @@ function npl_init() {
 			exit;
 		}
 	} else {
-		$user = wp_get_current_user();
-		if ( $user && $user->exists() ) {
+		$notice = defined( 'NPL_NOTICE' ) ? filter_var( NPL_NOTICE, FILTER_VALIDATE_BOOLEAN ) : true;
+		if ( $notice && ( $user = wp_get_current_user() ) && $user->exists() ) {
 			add_action( 'admin_notices', 'npl_notice' );
 		}
 	}
