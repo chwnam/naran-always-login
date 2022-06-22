@@ -3,10 +3,10 @@
  * Plugin Name:  Naran Persistent Login
  * Description:  Keep the user always logged in.
  * Author:       changwoo
- * Author URI:   mailto://chwnam@gmail.com
+ * Author URI:   https://blog.changwoo.pe.kr
  * Plugin URI:   https://github.com/chwnam/naran-persistent-login
  * Requires PHP: 7.2
- * Version:      1.1.0
+ * Version:      1.1.1
  */
 
 if ( ! function_exists( 'npl_init' ) ) {
@@ -48,9 +48,10 @@ if ( ! function_exists( 'npl_condition' ) ) {
 		 * 1. 로컬에서 접속할 것.
 		 * 2. WP_CLI 사용 중이 아닐 것.
 		 * 3. DOING_* 류 상수 정의가 되어 있지 않을 것.
-		 * 4. NPL_USER 상수를 정의할 것.
-		 * 5. NPL_ENABLED 상수를 정의하고 참으로 할 것.
-		 * 6. 로그인되어 있지 않을 것.
+		 * 4. REST API 수행 중이 아닐 것.
+		 * 5. NPL_USER 상수를 정의할 것.
+		 * 6. NPL_ENABLED 상수를 정의하고 참으로 할 것.
+		 * 7. 로그인되어 있지 않을 것.
 		 */
 		static $condition = null;
 
@@ -60,6 +61,7 @@ if ( ! function_exists( 'npl_condition' ) ) {
 			             ! defined( 'DOING_CRON' ) &&
 			             ! defined( 'DOING_AJAX' ) &&
 			             ! defined( 'DOING_AUTOSAVE' ) &&
+			             ! npl_is_rest_api() &&
 			             ( defined( 'NPL_USER' ) && NPL_USER ) &&
 			             ( defined( 'NPL_ENABLED' ) && NPL_ENABLED ) &&
 			             ! is_user_logged_in() &&
@@ -67,6 +69,24 @@ if ( ! function_exists( 'npl_condition' ) ) {
 		}
 
 		return apply_filters( 'npl_condition', $condition );
+	}
+}
+
+
+if ( ! function_exists( 'npl_is_rest_api' ) ) {
+	function npl_is_rest_api() {
+		$request_uri = trim( $_SERVER['REQUEST_URI'] ?? '', '/' );
+		$result      = false;
+
+		if ( $request_uri ) {
+			global $wp_rewrite;
+
+			$index  = $wp_rewrite->index;
+			$prefix = rest_get_url_prefix();
+			$result = (bool) preg_match( ";^(?:$prefix/?|$index/$prefix/);", $request_uri );
+		}
+
+		return $result;
 	}
 }
 
