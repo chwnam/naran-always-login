@@ -6,7 +6,7 @@
  * Author URI:   https://blog.changwoo.pe.kr
  * Plugin URI:   https://github.com/chwnam/naran-persistent-login
  * Requires PHP: 7.2
- * Version:      1.1.1
+ * Version:      1.1.2
  */
 
 if ( ! function_exists( 'npl_init' ) ) {
@@ -14,7 +14,7 @@ if ( ! function_exists( 'npl_init' ) ) {
 		add_action( 'init', 'npl_init' );
 	}
 
-	function npl_init() {
+	function npl_init(): void {
 		if ( is_user_logged_in() && npl_is_suppressed() ) {
 			wp_logout();
 			wp_safe_redirect( home_url() );
@@ -52,6 +52,7 @@ if ( ! function_exists( 'npl_condition' ) ) {
 		 * 5. NPL_USER 상수를 정의할 것.
 		 * 6. NPL_ENABLED 상수를 정의하고 참으로 할 것.
 		 * 7. 로그인되어 있지 않을 것.
+		 * 8. WPGraphQL: POST method 에 graphql GET 파라미터가 설정되면 무시될 것.
 		 */
 		static $condition = null;
 
@@ -65,7 +66,9 @@ if ( ! function_exists( 'npl_condition' ) ) {
 			             ( defined( 'NPL_USER' ) && NPL_USER ) &&
 			             ( defined( 'NPL_ENABLED' ) && NPL_ENABLED ) &&
 			             ! is_user_logged_in() &&
-			             ! npl_is_suppressed();
+			             ! npl_is_suppressed() &&
+			             ! ( 'POST' === ( $_SERVER['REQUEST_METHOD'] ?? '' ) && array_key_exists( 'graphql', $_GET ) )
+			;
 		}
 
 		return apply_filters( 'npl_condition', $condition );
@@ -74,7 +77,7 @@ if ( ! function_exists( 'npl_condition' ) ) {
 
 
 if ( ! function_exists( 'npl_is_rest_api' ) ) {
-	function npl_is_rest_api() {
+	function npl_is_rest_api(): bool {
 		$request_uri = trim( $_SERVER['REQUEST_URI'] ?? '', '/' );
 		$result      = false;
 
@@ -92,7 +95,7 @@ if ( ! function_exists( 'npl_is_rest_api' ) ) {
 
 
 if ( ! function_exists( 'npl_notice' ) ) {
-	function npl_notice() {
+	function npl_notice(): void {
 		$url = wp_nonce_url( admin_url( 'admin-post.php' ) . '?action=npl_suppress', 'npl_suppress' );
 		echo '<div class="notice notice-info"><p>';
 		echo 'Naran Persistent Login is active!';
@@ -103,8 +106,8 @@ if ( ! function_exists( 'npl_notice' ) ) {
 
 
 if ( ! function_exists( 'npl_footer_suppressed' ) ) {
-	function npl_footer_suppressed() {
-		$url = wp_nonce_url( admin_url( 'admin-post.php' ) . '?action=npl_unsupress', 'npl_unsuppress' );
+	function npl_footer_suppressed(): void {
+		$url = wp_nonce_url( admin_url( 'admin-post.php' ) . '?action=npl_unsuppress', 'npl_unsuppress' );
 		echo '<p style="padding: 10px 20px;">Persistent login is temporarily suppressed now.';
 		echo ' <a href="' . esc_url( $url ) . '">Enable now</a>?</p>';
 	}
@@ -113,7 +116,7 @@ if ( ! function_exists( 'npl_footer_suppressed' ) ) {
 
 if ( ! function_exists( 'npl_admin_post_suppress' ) ) {
 	add_action( 'admin_post_npl_suppress', 'npl_admin_post_suppress' );
-	function npl_admin_post_suppress() {
+	function npl_admin_post_suppress(): void {
 		check_admin_referer( 'npl_suppress' );
 		npl_suppress( true );
 		wp_safe_redirect( home_url() );
@@ -122,8 +125,8 @@ if ( ! function_exists( 'npl_admin_post_suppress' ) ) {
 
 
 if ( ! function_exists( 'npl_admin_post_unsuppress' ) ) {
-	add_action( 'admin_post_nopriv_npl_unsupress', 'npl_admin_post_unsuppress' );
-	function npl_admin_post_unsuppress() {
+	add_action( 'admin_post_nopriv_npl_unsuppress', 'npl_admin_post_unsuppress' );
+	function npl_admin_post_unsuppress(): void {
 		check_admin_referer( 'npl_unsuppress' );
 		npl_suppress( false );
 		wp_safe_redirect( home_url() );
@@ -139,7 +142,7 @@ if ( ! function_exists( 'npl_is_suppressed' ) ) {
 
 
 if ( ! function_exists( 'npl_suppress' ) ) {
-	function npl_suppress( bool $suppress ) {
+	function npl_suppress( bool $suppress ): void {
 		update_site_option( 'npl_suppress', $suppress );
 	}
 }
